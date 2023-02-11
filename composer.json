@@ -1,5 +1,5 @@
 {
-    "name": "peppeocchi/php-cron-scheduler",
+    "name": "lordf/php-cron-scheduler",
     "description": "PHP Cron Job Scheduler",
     "license": "MIT",
     "keywords": ["cron job", "scheduler"],
@@ -12,6 +12,11 @@
             "name": "Carsten Windler",
             "email": "carsten@carstenwindler.de",
             "homepage": "http://carstenwindler.de",
+            "role": "Contributor"
+        },
+        {
+            "name": "Karol Kolanko",
+            "email": "karol.piotr.kolanko@gmail.com",
             "role": "Contributor"
         }
     ],
