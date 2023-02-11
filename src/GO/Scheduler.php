@@ -11,33 +11,33 @@ class Scheduler
      *
      * @var array
      */
-    private $jobs = [];
+    private array $jobs = [];
 
     /**
      * Successfully executed jobs.
      *
      * @var array
      */
-    private $executedJobs = [];
+    private array $executedJobs = [];
 
     /**
      * Failed jobs.
      *
      * @var FailedJob[]
      */
-    private $failedJobs = [];
+    private array $failedJobs = [];
 
     /**
      * The verbose output of the scheduled jobs.
      *
      * @var array
      */
-    private $outputSchedule = [];
+    private array $outputSchedule = [];
 
     /**
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * Create new instance.
@@ -65,7 +65,7 @@ class Scheduler
      *
      * @return array
      */
-    private function prioritiseJobs()
+    private function prioritiseJobs(): array
     {
         $background = [];
         $foreground = [];
@@ -86,7 +86,7 @@ class Scheduler
      *
      * @return array
      */
-    public function getQueuedJobs()
+    public function getQueuedJobs(): array
     {
         return $this->prioritiseJobs();
     }
@@ -99,7 +99,7 @@ class Scheduler
      * @param  string  $id   Optional custom identifier
      * @return Job
      */
-    public function call(callable $fn, $args = [], $id = null)
+    public function call(callable $fn, array $args = [], string $id = null): Job
     {
         $job = new Job($fn, $args, $id);
 
@@ -117,12 +117,8 @@ class Scheduler
      * @param  string  $id      Optional custom identifier
      * @return Job
      */
-    public function php($script, $bin = null, $args = [], $id = null)
+    public function php(string $script, string $bin = null, array $args = [], string $id = null): Job
     {
-        if (! is_string($script)) {
-            throw new InvalidArgumentException('The script should be a valid path to a file.');
-        }
-
         $bin = is_string($bin) && file_exists($bin) ?
             $bin : (PHP_BINARY === '' ? '/usr/bin/php' : PHP_BINARY);
 
@@ -148,7 +144,7 @@ class Scheduler
      * @param  string  $id       Optional custom identifier
      * @return Job
      */
-    public function raw($command, $args = [], $id = null)
+    public function raw(string $command, array $args = [], string $id = null): Job
     {
         $job = new Job($command, $args, $id);
 
@@ -163,7 +159,7 @@ class Scheduler
      * @param  DateTime  $runTime  Optional, run at specific moment
      * @return array  Executed jobs
      */
-    public function run(Datetime $runTime = null)
+    public function run(Datetime $runTime = null): array
     {
         $jobs = $this->getQueuedJobs();
 
@@ -190,7 +186,7 @@ class Scheduler
      *
      * Call before run() if you call run() multiple times.
      */
-    public function resetRun()
+    public function resetRun(): Scheduler
     {
         // Reset collected data of last run
         $this->executedJobs = [];
@@ -206,7 +202,7 @@ class Scheduler
      * @param  string  $string
      * @return void
      */
-    private function addSchedulerVerboseOutput($string)
+    private function addSchedulerVerboseOutput(string $string)
     {
         $now = '[' . (new DateTime('now'))->format('c') . '] ';
         $this->outputSchedule[] = $now . $string;
@@ -221,7 +217,7 @@ class Scheduler
      * @param  Job  $job
      * @return Job
      */
-    private function pushExecutedJob(Job $job)
+    private function pushExecutedJob(Job $job): Job
     {
         $this->executedJobs[] = $job;
 
@@ -242,7 +238,7 @@ class Scheduler
      *
      * @return array
      */
-    public function getExecutedJobs()
+    public function getExecutedJobs(): array
     {
         return $this->executedJobs;
     }
@@ -254,7 +250,7 @@ class Scheduler
      * @param  Exception  $e
      * @return Job
      */
-    private function pushFailedJob(Job $job, Exception $e)
+    private function pushFailedJob(Job $job, Exception $e): Job
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
@@ -275,7 +271,7 @@ class Scheduler
      *
      * @return FailedJob[]
      */
-    public function getFailedJobs()
+    public function getFailedJobs(): array
     {
         return $this->failedJobs;
     }
@@ -286,7 +282,7 @@ class Scheduler
      * @param  string  $type  Allowed: text, html, array
      * @return mixed  The return depends on the requested $type
      */
-    public function getVerboseOutput($type = 'text')
+    public function getVerboseOutput(string $type = 'text')
     {
         switch ($type) {
             case 'text':
@@ -303,7 +299,7 @@ class Scheduler
     /**
      * Remove all queued Jobs.
      */
-    public function clearJobs()
+    public function clearJobs(): Scheduler
     {
         $this->jobs = [];
 
