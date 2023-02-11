@@ -123,7 +123,7 @@ class Scheduler
             throw new InvalidArgumentException('The script should be a valid path to a file.');
         }
 
-        $bin = $bin !== null && is_string($bin) && file_exists($bin) ?
+        $bin = is_string($bin) && file_exists($bin) ?
             $bin : (PHP_BINARY === '' ? '/usr/bin/php' : PHP_BINARY);
 
         $job = new Job($bin . ' ' . $script, $args, $id);
