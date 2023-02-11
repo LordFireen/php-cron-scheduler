@@ -228,7 +228,7 @@ class Scheduler
             $compiled = 'Closure';
         }
 
-        $this->addSchedulerVerboseOutput("Executing {$compiled}");
+        $this->addSchedulerVerboseOutput("Executing $compiled");
 
         return $job;
     }
@@ -261,7 +261,7 @@ class Scheduler
             $compiled = 'Closure';
         }
 
-        $this->addSchedulerVerboseOutput("{$e->getMessage()}: {$compiled}");
+        $this->addSchedulerVerboseOutput("{$e->getMessage()}: $compiled");
 
         return $job;
     }
