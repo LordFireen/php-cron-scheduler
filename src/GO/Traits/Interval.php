@@ -410,7 +410,7 @@ trait Interval
             ! ($value >= $min && $value <= $max)
         ) {
             throw new InvalidArgumentException(
-                "Invalid value: it should be '*' or between {$min} and {$max}."
+                "Invalid value: it should be '*' or between $min and $max."
             );
         }
 
