@@ -29,7 +29,7 @@ class Job
      *
      * @var array
      */
-    private array $args = [];
+    private array $args;
 
     /**
      * Defines if the job should run in background.
@@ -367,6 +367,7 @@ class Job
     /**
      * Run the job.
      *
+     * @throws Exception
      * @return bool
      */
     public function run(): bool
@@ -410,7 +411,7 @@ class Job
     private function createLockFile($content = null)
     {
         if ($this->lockFile) {
-            if ($content === null || ! is_string($content)) {
+            if (!is_string($content)) {
                 $content = $this->getId();
             }
 
