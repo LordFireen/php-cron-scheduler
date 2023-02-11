@@ -2,6 +2,7 @@
 
 use Cron\CronExpression;
 use DateTime;
+use DateTimeInterface;
 use InvalidArgumentException;
 use Throwable;
 
@@ -41,9 +42,9 @@ class Job
     /**
      * Creation time.
      *
-     * @var DateTime
+     * @var DateTimeInterface
      */
-    private DateTime $creationTime;
+    private DateTimeInterface $creationTime;
 
     /**
      * Job schedule time.
@@ -191,10 +192,10 @@ class Job
      * the job is due. Defaults to job creation time.
      * It also defaults the execution time if not previously defined.
      *
-     * @param DateTime|null $date
+     * @param DateTimeInterface|null $date
      * @return bool
      */
-    public function isDue(DateTime $date = null): bool
+    public function isDue(DateTimeInterface $date = null): bool
     {
         // The execution time is being defaulted if not defined
         if (! $this->executionTime) {

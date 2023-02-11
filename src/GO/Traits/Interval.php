@@ -2,6 +2,7 @@
 
 use DateTime;
 use Cron\CronExpression;
+use DateTimeInterface;
 use InvalidArgumentException;
 
 trait Interval
@@ -22,13 +23,13 @@ trait Interval
     /**
      * Run the Job at a specific date.
      *
-     * @param string|DateTime $date
+     * @param string|DateTimeInterface $date
      * @throws \Exception When date is incorrect string
      * @return self
      */
     public function date($date): self
     {
-        if (! $date instanceof DateTime) {
+        if (! $date instanceof DateTimeInterface) {
             $date = new DateTime($date);
         }
 
