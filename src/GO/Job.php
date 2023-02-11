@@ -147,9 +147,9 @@ class Job
     /**
      * Create a new Job instance.
      *
-     * @param  string|callable  $command
-     * @param  array            $args
-     * @param  string           $id
+     * @param string|callable $command
+     * @param array           $args
+     * @param string|null     $id
      */
     public function __construct($command, array $args = [], string $id = null)
     {
@@ -191,7 +191,7 @@ class Job
      * the job is due. Defaults to job creation time.
      * It also defaults the execution time if not previously defined.
      *
-     * @param  DateTime  $date
+     * @param DateTime|null $date
      * @return bool
      */
     public function isDue(DateTime $date = null): bool
@@ -254,8 +254,8 @@ class Job
      * being executed if the previous is still running.
      * The job id is used as a filename for the lock file.
      *
-     * @param  string    $tempDir          The directory path for the lock files
-     * @param  callable  $whenOverlapping  A callback to ignore job overlapping
+     * @param string|null   $tempDir         The directory path for the lock files
+     * @param callable|null $whenOverlapping A callback to ignore job overlapping
      * @return self
      */
     public function onlyOne(string $tempDir = null, callable $whenOverlapping = null): Job
@@ -283,7 +283,7 @@ class Job
     /**
      * Compile the Job command.
      *
-     * @return mixed
+     * @return callable|object|string
      */
     public function compile()
     {
@@ -468,8 +468,8 @@ class Job
     /**
      * Set the file/s where to write the output of the job.
      *
-     * @param  string|array  $filename
-     * @param  bool          $append
+     * @param string|array $filename
+     * @param bool         $append
      * @return self
      */
     public function output($filename, bool $append = false): Job
@@ -573,8 +573,8 @@ class Job
      * second parameter. The job will run in background if it
      * meets all the other criteria.
      *
-     * @param  callable  $fn
-     * @param  bool      $runInBackground
+     * @param callable $fn
+     * @param bool     $runInBackground
      * @return self
      */
     public function then(callable $fn, bool $runInBackground = false): Job
