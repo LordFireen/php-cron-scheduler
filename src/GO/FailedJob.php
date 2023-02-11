@@ -7,12 +7,12 @@ class FailedJob
     /**
      * @var Job
      */
-    private $job;
+    private Job $job;
 
     /**
      * @var Exception
      */
-    private $exception;
+    private Exception $exception;
 
     public function __construct(Job $job, Exception $exception)
     {
