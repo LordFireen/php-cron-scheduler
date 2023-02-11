@@ -513,7 +513,7 @@ class Job
     }
 
     /**
-     * Finilise the job after execution.
+     * Finalise the job after execution.
      *
      * @return void
      */
@@ -567,7 +567,7 @@ class Job
 
     /**
      * Set a function to be called after job execution.
-     * By default this will force the job to run in foreground
+     * By default, this will force the job to run in foreground
      * because the output is injected as a parameter of this
      * function, but it could be avoided by passing true as a
      * second parameter. The job will run in background if it
