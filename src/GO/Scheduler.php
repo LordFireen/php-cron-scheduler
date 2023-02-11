@@ -3,6 +3,7 @@
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use Throwable;
 
 class Scheduler
 {
@@ -172,7 +173,7 @@ class Scheduler
                 try {
                     $job->run();
                     $this->pushExecutedJob($job);
-                } catch (\Exception $e) {
+                } catch (Throwable $e) {
                     $this->pushFailedJob($job, $e);
                 }
             }

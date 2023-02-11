@@ -2,8 +2,8 @@
 
 use Cron\CronExpression;
 use DateTime;
-use Exception;
 use InvalidArgumentException;
+use Throwable;
 
 class Job
 {
@@ -367,7 +367,7 @@ class Job
     /**
      * Run the job.
      *
-     * @throws Exception
+     * @throws Throwable
      * @return bool
      */
     public function run(): bool
@@ -435,7 +435,7 @@ class Job
      * Execute a callable job.
      *
      * @param  callable  $fn
-     * @throws Exception
+     * @throws Throwable
      * @return string
      */
     private function exec(callable $fn): string
@@ -444,7 +444,7 @@ class Job
 
         try {
             $returnData = call_user_func_array($fn, $this->args);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             ob_end_clean();
             throw $e;
         }
