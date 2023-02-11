@@ -215,9 +215,9 @@ class Scheduler
      * Push a successfully executed job.
      *
      * @param  Job  $job
-     * @return Job
+     * @return void
      */
-    private function pushExecutedJob(Job $job): Job
+    private function pushExecutedJob(Job $job): void
     {
         $this->executedJobs[] = $job;
 
@@ -229,8 +229,6 @@ class Scheduler
         }
 
         $this->addSchedulerVerboseOutput("Executing $compiled");
-
-        return $job;
     }
 
     /**
@@ -248,9 +246,9 @@ class Scheduler
      *
      * @param  Job  $job
      * @param  Exception  $e
-     * @return Job
+     * @return void
      */
-    private function pushFailedJob(Job $job, Exception $e): Job
+    private function pushFailedJob(Job $job, Exception $e): void
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
@@ -262,8 +260,6 @@ class Scheduler
         }
 
         $this->addSchedulerVerboseOutput("{$e->getMessage()}: $compiled");
-
-        return $job;
     }
 
     /**
