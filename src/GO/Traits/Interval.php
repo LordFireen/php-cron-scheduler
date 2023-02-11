@@ -9,7 +9,7 @@ trait Interval
     /**
      * Set the Job execution time.
      *
-     * @param  string  $expression
+     * @param string $expression
      * @return self
      */
     public function at(string $expression): self
@@ -22,7 +22,7 @@ trait Interval
     /**
      * Run the Job at a specific date.
      *
-     * @param  string|DateTime  $date
+     * @param string|DateTime $date
      * @return self
      */
     public function date($date): self
@@ -39,7 +39,7 @@ trait Interval
     /**
      * Set the execution time to every minute.
      *
-     * @param int|string|null When set, specifies that the job will be run every $minute minutes
+     * @param int|string|null $minute When set, specifies that the job will be run every $minute minutes
      *
      * @return self
      */
@@ -394,10 +394,10 @@ trait Interval
     /**
      * Validate sequence of cron expression.
      *
-     * @param  int|string  $value
-     * @param  int         $min
-     * @param  int         $max
-     * @return mixed
+     * @param int|string $value
+     * @param int        $min
+     * @param int        $max
+     * @return int|string
      */
     private function validateCronRange($value, int $min, int $max)
     {
