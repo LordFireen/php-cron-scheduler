@@ -116,7 +116,7 @@ class Job
      *
      * @var array
      */
-    private $emailConfig = [];
+    private array $emailConfig = [];
 
     /**
      * A function to execute before the job is executed.

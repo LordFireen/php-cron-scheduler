@@ -56,7 +56,7 @@ class Scheduler
      * @param  Job  $job
      * @return void
      */
-    private function queueJob(Job $job)
+    protected function queueJob(Job $job)
     {
         $this->jobs[] = $job;
     }
@@ -66,7 +66,7 @@ class Scheduler
      *
      * @return Job[]
      */
-    private function prioritiseJobs(): array
+    protected function prioritiseJobs(): array
     {
         $background = [];
         $foreground = [];
