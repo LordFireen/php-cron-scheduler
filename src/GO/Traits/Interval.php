@@ -15,7 +15,7 @@ trait Interval
      */
     public function at(string $expression): self
     {
-        $this->executionTime = CronExpression::factory($expression);
+        $this->executionTime = new CronExpression($expression);
 
         return $this;
     }
