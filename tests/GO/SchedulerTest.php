@@ -64,7 +64,7 @@ class SchedulerTest extends TestCase
 
     public function testShouldThrowExceptionIfScriptIsNotAString()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\TypeError::class);
 
         $scheduler = new Scheduler();
         $scheduler->php(function () {
