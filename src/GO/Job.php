@@ -73,7 +73,7 @@ class Job
      *
      * @var string
      */
-    private string $lockFile;
+    private string $lockFile = '';
 
     /**
      * This could prevent the job to run.
