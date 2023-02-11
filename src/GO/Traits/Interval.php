@@ -23,6 +23,7 @@ trait Interval
      * Run the Job at a specific date.
      *
      * @param string|DateTime $date
+     * @throws \Exception When date is incorrect string
      * @return self
      */
     public function date($date): self
