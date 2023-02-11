@@ -20,11 +20,21 @@ class FailedJob
         $this->exception = $exception;
     }
 
+    /**
+     * Get the job which was failed.
+     *
+     * @return Job
+     */
     public function getJob(): Job
     {
         return $this->job;
     }
 
+    /**
+     * Get the exception that failed the job.
+     *
+     * @return Exception
+     */
     public function getException(): Exception
     {
         return $this->exception;
