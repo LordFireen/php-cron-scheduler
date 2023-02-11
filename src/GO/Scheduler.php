@@ -94,9 +94,9 @@ class Scheduler
     /**
      * Queues a function execution.
      *
-     * @param  callable  $fn  The function to execute
-     * @param  array  $args  Optional arguments to pass to the php script
-     * @param  string  $id   Optional custom identifier
+     * @param callable    $fn   The function to execute
+     * @param array       $args Optional arguments to pass to the php script
+     * @param string|null $id   Optional custom identifier
      * @return Job
      */
     public function call(callable $fn, array $args = [], string $id = null): Job
@@ -111,10 +111,10 @@ class Scheduler
     /**
      * Queues a php script execution.
      *
-     * @param  string  $script  The path to the php script to execute
-     * @param  string  $bin     Optional path to the php binary
-     * @param  array  $args     Optional arguments to pass to the php script
-     * @param  string  $id      Optional custom identifier
+     * @param string      $script The path to the php script to execute
+     * @param string|null $bin    Optional path to the php binary
+     * @param array       $args   Optional arguments to pass to the php script
+     * @param string|null $id     Optional custom identifier
      * @return Job
      */
     public function php(string $script, string $bin = null, array $args = [], string $id = null): Job
@@ -124,7 +124,7 @@ class Scheduler
 
         $job = new Job($bin . ' ' . $script, $args, $id);
 
-        if (! file_exists($script)) {
+        if (!file_exists($script)) {
             $this->pushFailedJob(
                 $job,
                 new InvalidArgumentException('The script should be a valid path to a file.')
@@ -139,9 +139,9 @@ class Scheduler
     /**
      * Queue a raw shell command.
      *
-     * @param  string  $command  The command to execute
-     * @param  array  $args      Optional arguments to pass to the command
-     * @param  string  $id       Optional custom identifier
+     * @param string      $command The command to execute
+     * @param array       $args    Optional arguments to pass to the command
+     * @param string|null $id      Optional custom identifier
      * @return Job
      */
     public function raw(string $command, array $args = [], string $id = null): Job
@@ -156,7 +156,7 @@ class Scheduler
     /**
      * Run the scheduler.
      *
-     * @param  DateTime  $runTime  Optional, run at specific moment
+     * @param DateTime|null $runTime Optional, run at specific moment
      * @return array  Executed jobs
      */
     public function run(Datetime $runTime = null): array
@@ -199,7 +199,7 @@ class Scheduler
     /**
      * Add an entry to the scheduler verbose output array.
      *
-     * @param  string  $string
+     * @param string $string
      * @return void
      */
     private function addSchedulerVerboseOutput(string $string)
@@ -212,7 +212,7 @@ class Scheduler
     }
 
     /**
-     * Push a succesfully executed job.
+     * Push a successfully executed job.
      *
      * @param  Job  $job
      * @return Job
@@ -279,8 +279,8 @@ class Scheduler
     /**
      * Get the scheduler verbose output.
      *
-     * @param  string  $type  Allowed: text, html, array
-     * @return mixed  The return depends on the requested $type
+     * @param string $type Allowed: text, html, array
+     * @return array|string  The return depends on the requested $type
      */
     public function getVerboseOutput(string $type = 'text')
     {
