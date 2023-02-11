@@ -79,7 +79,7 @@ trait Interval
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour);
@@ -100,7 +100,7 @@ trait Interval
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour, null, null, $weekday);
@@ -122,7 +122,7 @@ trait Interval
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour, $day, $month);
