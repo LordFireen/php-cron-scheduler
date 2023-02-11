@@ -9,14 +9,14 @@ class Scheduler
     /**
      * The queued jobs.
      *
-     * @var array
+     * @var Job[]
      */
     private array $jobs = [];
 
     /**
      * Successfully executed jobs.
      *
-     * @var array
+     * @var Job[]
      */
     private array $executedJobs = [];
 
@@ -30,7 +30,7 @@ class Scheduler
     /**
      * The verbose output of the scheduled jobs.
      *
-     * @var array
+     * @var string[]
      */
     private array $outputSchedule = [];
 
@@ -63,7 +63,7 @@ class Scheduler
     /**
      * Prioritise jobs in background.
      *
-     * @return array
+     * @return Job[]
      */
     private function prioritiseJobs(): array
     {
@@ -84,7 +84,7 @@ class Scheduler
     /**
      * Get the queued jobs.
      *
-     * @return array
+     * @return Job[]
      */
     public function getQueuedJobs(): array
     {
@@ -157,7 +157,7 @@ class Scheduler
      * Run the scheduler.
      *
      * @param DateTime|null $runTime Optional, run at specific moment
-     * @return array  Executed jobs
+     * @return Job[]  Executed jobs
      */
     public function run(Datetime $runTime = null): array
     {
@@ -280,7 +280,7 @@ class Scheduler
      * Get the scheduler verbose output.
      *
      * @param string $type Allowed: text, html, array
-     * @return array|string  The return depends on the requested $type
+     * @return string[]|string  The return depends on the requested $type
      */
     public function getVerboseOutput(string $type = 'text')
     {
@@ -309,7 +309,7 @@ class Scheduler
     /**
      * Start a worker.
      *
-     * @param  array  $seconds - When the scheduler should run
+     * @param array $seconds - When the scheduler should run
      */
     public function work(array $seconds = [0])
     {
