@@ -1,5 +1,6 @@
 <?php namespace GO;
 
+use Cron\CronExpression;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
@@ -14,7 +15,7 @@ class Job
      *
      * @var string
      */
-    private $id;
+    private string $id;
 
     /**
      * Command to execute.
@@ -28,26 +29,26 @@ class Job
      *
      * @var array
      */
-    private $args = [];
+    private array $args = [];
 
     /**
      * Defines if the job should run in background.
      *
      * @var bool
      */
-    private $runInBackground = true;
+    private bool $runInBackground = true;
 
     /**
      * Creation time.
      *
      * @var DateTime
      */
-    private $creationTime;
+    private DateTime $creationTime;
 
     /**
      * Job schedule time.
      *
-     * @var Cron\CronExpression
+     * @var CronExpression
      */
     private $executionTime;
 
@@ -64,14 +65,14 @@ class Job
      *
      * @var string
      */
-    private $tempDir;
+    private string $tempDir;
 
     /**
      * Path to the lock file.
      *
      * @var string
      */
-    private $lockFile;
+    private string $lockFile;
 
     /**
      * This could prevent the job to run.
@@ -79,7 +80,7 @@ class Job
      *
      * @var bool
      */
-    private $truthTest = true;
+    private bool $truthTest = true;
 
     /**
      * The output of the executed job.
@@ -93,21 +94,21 @@ class Job
      *
      * @var int
      */
-    private $returnCode = 0;
+    private int $returnCode = 0;
 
     /**
      * Files to write the output of the job.
      *
      * @var array
      */
-    private $outputTo = [];
+    private array $outputTo = [];
 
     /**
      * Email addresses where the output should be sent to.
      *
      * @var array
      */
-    private $emailTo = [];
+    private array $emailTo = [];
 
     /**
      * Configuration for email sending.
@@ -141,7 +142,7 @@ class Job
     /**
      * @var string
      */
-    private $outputMode;
+    private string $outputMode;
 
     /**
      * Create a new Job instance.
@@ -150,7 +151,7 @@ class Job
      * @param  array            $args
      * @param  string           $id
      */
-    public function __construct($command, $args = [], $id = null)
+    public function __construct($command, array $args = [], string $id = null)
     {
         if (is_string($id)) {
             $this->id = $id;
@@ -179,7 +180,7 @@ class Job
      *
      * @return string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
@@ -193,7 +194,7 @@ class Job
      * @param  DateTime  $date
      * @return bool
      */
-    public function isDue(DateTime $date = null)
+    public function isDue(DateTime $date = null): bool
     {
         // The execution time is being defaulted if not defined
         if (! $this->executionTime) {
@@ -214,7 +215,7 @@ class Job
      *
      * @return bool
      */
-    public function isOverlapping()
+    public function isOverlapping(): bool
     {
         return $this->lockFile &&
                file_exists($this->lockFile) &&
@@ -226,7 +227,7 @@ class Job
      *
      * @return self
      */
-    public function inForeground()
+    public function inForeground(): Job
     {
         $this->runInBackground = false;
 
@@ -238,7 +239,7 @@ class Job
      *
      * @return bool
      */
-    public function canRunInBackground()
+    public function canRunInBackground(): bool
     {
         if (is_callable($this->command) || $this->runInBackground === false) {
             return false;
@@ -257,7 +258,7 @@ class Job
      * @param  callable  $whenOverlapping  A callback to ignore job overlapping
      * @return self
      */
-    public function onlyOne($tempDir = null, callable $whenOverlapping = null)
+    public function onlyOne(string $tempDir = null, callable $whenOverlapping = null): Job
     {
         if ($tempDir === null || ! is_dir($tempDir)) {
             $tempDir = $this->tempDir;
@@ -333,7 +334,7 @@ class Job
      * @param  array  $config
      * @return self
      */
-    public function configure(array $config = [])
+    public function configure(array $config = []): Job
     {
         if (isset($config['email'])) {
             if (! is_array($config['email'])) {
@@ -356,7 +357,7 @@ class Job
      * @param  callable  $fn
      * @return self
      */
-    public function when(callable $fn)
+    public function when(callable $fn): Job
     {
         $this->truthTest = $fn();
 
@@ -368,7 +369,7 @@ class Job
      *
      * @return bool
      */
-    public function run()
+    public function run(): bool
     {
         // If the truthTest failed, don't run
         if ($this->truthTest !== true) {
@@ -436,7 +437,7 @@ class Job
      * @throws Exception
      * @return string
      */
-    private function exec(callable $fn)
+    private function exec(callable $fn): string
     {
         ob_start();
 
@@ -471,7 +472,7 @@ class Job
      * @param  bool          $append
      * @return self
      */
-    public function output($filename, $append = false)
+    public function output($filename, bool $append = false): Job
     {
         $this->outputTo = is_array($filename) ? $filename : [$filename];
         $this->outputMode = $append === false ? 'w' : 'a';
@@ -497,7 +498,7 @@ class Job
      * @param  string|array  $email
      * @return self
      */
-    public function email($email)
+    public function email($email): Job
     {
         if (! is_string($email) && ! is_array($email)) {
             throw new InvalidArgumentException('The email can be only string or array');
@@ -532,7 +533,7 @@ class Job
      *
      * @return bool
      */
-    private function emailOutput()
+    private function emailOutput(): bool
     {
         if (! count($this->outputTo) || ! count($this->emailTo)) {
             return false;
@@ -557,7 +558,7 @@ class Job
      * @param callable $fn
      * @return self
      */
-    public function before(callable $fn)
+    public function before(callable $fn): Job
     {
         $this->before = $fn;
 
@@ -576,7 +577,7 @@ class Job
      * @param  bool      $runInBackground
      * @return self
      */
-    public function then(callable $fn, $runInBackground = false)
+    public function then(callable $fn, bool $runInBackground = false): Job
     {
         $this->after = $fn;
 
