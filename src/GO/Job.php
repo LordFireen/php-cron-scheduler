@@ -8,8 +8,22 @@ use Throwable;
 
 class Job
 {
-    use Traits\Interval,
-        Traits\Mailer;
+    use Traits\Interval;
+    use Traits\Mailer;
+
+    /**
+     * Job schedule time.
+     *
+     * @var CronExpression
+     */
+    protected $executionTime;
+
+    /**
+     * Job schedule year.
+     *
+     * @var string
+     */
+    protected $executionYear = null;
 
     /**
      * Job identifier.
@@ -45,20 +59,6 @@ class Job
      * @var DateTimeInterface
      */
     private DateTimeInterface $creationTime;
-
-    /**
-     * Job schedule time.
-     *
-     * @var CronExpression
-     */
-    protected $executionTime;
-
-    /**
-     * Job schedule year.
-     *
-     * @var string
-     */
-    protected $executionYear = null;
 
     /**
      * Temporary directory path for
