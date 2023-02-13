@@ -171,7 +171,7 @@ class Scheduler
         foreach ($jobs as $job) {
             if ($job->isDue($runTime)) {
                 try {
-                    $job->run();
+                    $job->run($runTime);
                     $this->pushExecutedJob($job);
                 } catch (Throwable $e) {
                     $this->pushFailedJob($job, $e);

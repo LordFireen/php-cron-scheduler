@@ -61,7 +61,14 @@ class Job
     private DateTime $creationTime;
 
     /**
-     * Real time, when job was run.
+     * Time when the job was ordered to perform.
+     *
+     * @var DateTimeInterface
+     */
+    private DateTimeInterface $runTime;
+
+    /**
+     * Real time when the job started to run.
      *
      * @var DateTime
      */
@@ -382,11 +389,16 @@ class Job
     /**
      * Run the job.
      *
+     * @param DateTimeInterface|null $runTime Time when job run was run.
+     *
      * @throws Throwable
      * @return bool
      */
-    public function run(): bool
+    public function run(DateTimeInterface $runTime = null): bool
     {
+        // Run time will be added when we are sure that we need to run.
+        $runTime = $runTime ?: new DateTime('now');
+
         // If the truthTest failed, don't run
         if ($this->truthTest !== true) {
             return false;
@@ -396,7 +408,7 @@ class Job
         if ($this->isOverlapping()) {
             return false;
         }
-
+        $this->runTime = $runTime;
         $compiled = $this->compile();
 
         // Write lock file if necessary
@@ -622,7 +634,17 @@ class Job
     }
 
     /**
-     * Get real time, when job was run.
+     * Get Time when the job was ordered to perform.
+     *
+     * @return DateTimeInterface
+     */
+    public function getRunTime(): DateTimeInterface
+    {
+        return clone $this->runTime;
+    }
+
+    /**
+     * Get real time when the job started to run.
      *
      * @return DateTime
      */
