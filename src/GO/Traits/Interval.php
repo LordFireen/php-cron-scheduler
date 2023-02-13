@@ -2,6 +2,7 @@
 
 use DateTime;
 use Cron\CronExpression;
+use DateTimeInterface;
 use InvalidArgumentException;
 
 trait Interval
@@ -9,12 +10,12 @@ trait Interval
     /**
      * Set the Job execution time.
      *
-     * @param  string  $expression
+     * @param string $expression
      * @return self
      */
-    public function at($expression)
+    public function at(string $expression): self
     {
-        $this->executionTime = CronExpression::factory($expression);
+        $this->executionTime = new CronExpression($expression);
 
         return $this;
     }
@@ -22,12 +23,13 @@ trait Interval
     /**
      * Run the Job at a specific date.
      *
-     * @param  string|DateTime  $date
+     * @param string|DateTimeInterface $date
+     * @throws \Exception When date is incorrect string
      * @return self
      */
-    public function date($date)
+    public function date($date): self
     {
-        if (! $date instanceof DateTime) {
+        if (! $date instanceof DateTimeInterface) {
             $date = new DateTime($date);
         }
 
@@ -39,11 +41,11 @@ trait Interval
     /**
      * Set the execution time to every minute.
      *
-     * @param int|string|null When set, specifies that the job will be run every $minute minutes
+     * @param int|string|null $minute When set, specifies that the job will be run every $minute minutes
      *
      * @return self
      */
-    public function everyMinute($minute = null)
+    public function everyMinute($minute = null): self
     {
         $minuteExpression = '*';
         if ($minute !== null) {
@@ -60,7 +62,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function hourly($minute = 0)
+    public function hourly($minute = 0): self
     {
         $c = $this->validateCronSequence($minute);
 
@@ -74,12 +76,12 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function daily($hour = 0, $minute = 0)
+    public function daily($hour = 0, $minute = 0): self
     {
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour);
@@ -95,12 +97,12 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function weekly($weekday = 0, $hour = 0, $minute = 0)
+    public function weekly($weekday = 0, $hour = 0, $minute = 0): self
     {
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour, null, null, $weekday);
@@ -117,12 +119,12 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function monthly($month = '*', $day = 1, $hour = 0, $minute = 0)
+    public function monthly($month = '*', $day = 1, $hour = 0, $minute = 0): self
     {
         if (is_string($hour)) {
             $parts = explode(':', $hour);
             $hour = $parts[0];
-            $minute = isset($parts[1]) ? $parts[1] : '0';
+            $minute = $parts[1] ?? '0';
         }
 
         $c = $this->validateCronSequence($minute, $hour, $day, $month);
@@ -137,7 +139,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function sunday($hour = 0, $minute = 0)
+    public function sunday($hour = 0, $minute = 0): self
     {
         return $this->weekly(0, $hour, $minute);
     }
@@ -149,7 +151,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function monday($hour = 0, $minute = 0)
+    public function monday($hour = 0, $minute = 0): self
     {
         return $this->weekly(1, $hour, $minute);
     }
@@ -161,7 +163,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function tuesday($hour = 0, $minute = 0)
+    public function tuesday($hour = 0, $minute = 0): self
     {
         return $this->weekly(2, $hour, $minute);
     }
@@ -173,7 +175,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function wednesday($hour = 0, $minute = 0)
+    public function wednesday($hour = 0, $minute = 0): self
     {
         return $this->weekly(3, $hour, $minute);
     }
@@ -185,7 +187,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function thursday($hour = 0, $minute = 0)
+    public function thursday($hour = 0, $minute = 0): self
     {
         return $this->weekly(4, $hour, $minute);
     }
@@ -197,7 +199,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function friday($hour = 0, $minute = 0)
+    public function friday($hour = 0, $minute = 0): self
     {
         return $this->weekly(5, $hour, $minute);
     }
@@ -209,7 +211,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function saturday($hour = 0, $minute = 0)
+    public function saturday($hour = 0, $minute = 0): self
     {
         return $this->weekly(6, $hour, $minute);
     }
@@ -222,7 +224,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function january($day = 1, $hour = 0, $minute = 0)
+    public function january($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(1, $day, $hour, $minute);
     }
@@ -235,7 +237,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function february($day = 1, $hour = 0, $minute = 0)
+    public function february($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(2, $day, $hour, $minute);
     }
@@ -248,7 +250,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function march($day = 1, $hour = 0, $minute = 0)
+    public function march($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(3, $day, $hour, $minute);
     }
@@ -261,7 +263,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function april($day = 1, $hour = 0, $minute = 0)
+    public function april($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(4, $day, $hour, $minute);
     }
@@ -274,7 +276,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function may($day = 1, $hour = 0, $minute = 0)
+    public function may($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(5, $day, $hour, $minute);
     }
@@ -287,7 +289,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function june($day = 1, $hour = 0, $minute = 0)
+    public function june($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(6, $day, $hour, $minute);
     }
@@ -300,7 +302,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function july($day = 1, $hour = 0, $minute = 0)
+    public function july($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(7, $day, $hour, $minute);
     }
@@ -313,7 +315,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function august($day = 1, $hour = 0, $minute = 0)
+    public function august($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(8, $day, $hour, $minute);
     }
@@ -326,7 +328,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function september($day = 1, $hour = 0, $minute = 0)
+    public function september($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(9, $day, $hour, $minute);
     }
@@ -339,7 +341,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function october($day = 1, $hour = 0, $minute = 0)
+    public function october($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(10, $day, $hour, $minute);
     }
@@ -352,7 +354,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function november($day = 1, $hour = 0, $minute = 0)
+    public function november($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(11, $day, $hour, $minute);
     }
@@ -365,7 +367,7 @@ trait Interval
      * @param  int|string  $minute
      * @return self
      */
-    public function december($day = 1, $hour = 0, $minute = 0)
+    public function december($day = 1, $hour = 0, $minute = 0): self
     {
         return $this->monthly(12, $day, $hour, $minute);
     }
@@ -380,7 +382,7 @@ trait Interval
      * @param  int|string  $weekday
      * @return array
      */
-    private function validateCronSequence($minute = null, $hour = null, $day = null, $month = null, $weekday = null)
+    private function validateCronSequence($minute = null, $hour = null, $day = null, $month = null, $weekday = null): array
     {
         return [
             'minute' => $this->validateCronRange($minute, 0, 59),
@@ -394,12 +396,12 @@ trait Interval
     /**
      * Validate sequence of cron expression.
      *
-     * @param  int|string  $value
-     * @param  int         $min
-     * @param  int         $max
-     * @return mixed
+     * @param int|string $value
+     * @param int        $min
+     * @param int        $max
+     * @return int|string
      */
-    private function validateCronRange($value, $min, $max)
+    private function validateCronRange($value, int $min, int $max)
     {
         if ($value === null || $value === '*') {
             return '*';
@@ -409,7 +411,7 @@ trait Interval
             ! ($value >= $min && $value <= $max)
         ) {
             throw new InvalidArgumentException(
-                "Invalid value: it should be '*' or between {$min} and {$max}."
+                "Invalid value: it should be '*' or between $min and $max."
             );
         }
 

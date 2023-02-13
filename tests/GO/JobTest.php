@@ -38,7 +38,7 @@ class JobTest extends TestCase
         $this->assertNotEquals(md5('ls'), $job->getId());
         $this->assertEquals('aCustomId', $job->getId());
 
-        $job2 = new Job(['MyClass', 'myMethod'], null, 'myCustomId');
+        $job2 = new Job(['MyClass', 'myMethod'], [], 'myCustomId');
         $this->assertEquals('myCustomId', $job2->getId());
     }
 
@@ -237,6 +237,23 @@ class JobTest extends TestCase
         sleep(5);
 
         $this->assertFalse(file_exists($lockFile));
+    }
+
+    public function testShouldRemoveLockWhenFailedAfterRunningClosures()
+    {
+        $job = new Job(function () {
+            throw new \Exception('');
+        });
+
+        // Default temp dir
+        $tmpDir = __DIR__ . '/../tmp';
+        $lockFile = $tmpDir . '/' . $job->getId() . '.lock';
+
+        try {
+            $job->onlyOne($tmpDir)->run();
+        } catch (\Throwable $e) {
+            $this->assertFalse(file_exists($lockFile));
+        }
     }
 
     public function testShouldKnowIfOverlapping()

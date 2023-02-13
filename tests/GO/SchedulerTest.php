@@ -64,7 +64,7 @@ class SchedulerTest extends TestCase
 
     public function testShouldThrowExceptionIfScriptIsNotAString()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\TypeError::class);
 
         $scheduler = new Scheduler();
         $scheduler->php(function () {
@@ -301,11 +301,11 @@ class SchedulerTest extends TestCase
     {
         $scheduler = new Scheduler();
 
-        $scheduler->php(__DIR__ . '/../async_job.php', null, null, 'async_foreground')->then(function () {
+        $scheduler->php(__DIR__ . '/../async_job.php', null, [], 'async_foreground')->then(function () {
             return true;
         });
 
-        $scheduler->php(__DIR__ . '/../async_job.php', null, null, 'async_background');
+        $scheduler->php(__DIR__ . '/../async_job.php', null, [], 'async_background');
 
         $jobs = $scheduler->getQueuedJobs();
 

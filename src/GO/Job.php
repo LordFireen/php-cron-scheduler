@@ -1,20 +1,36 @@
 <?php namespace GO;
 
+use Cron\CronExpression;
 use DateTime;
-use Exception;
+use DateTimeInterface;
 use InvalidArgumentException;
+use Throwable;
 
 class Job
 {
-    use Traits\Interval,
-        Traits\Mailer;
+    use Traits\Interval;
+    use Traits\Mailer;
+
+    /**
+     * Job schedule time.
+     *
+     * @var CronExpression
+     */
+    protected $executionTime;
+
+    /**
+     * Job schedule year.
+     *
+     * @var string
+     */
+    protected $executionYear = null;
 
     /**
      * Job identifier.
      *
      * @var string
      */
-    private $id;
+    private string $id;
 
     /**
      * Command to execute.
@@ -28,35 +44,42 @@ class Job
      *
      * @var array
      */
-    private $args = [];
+    private array $args;
 
     /**
      * Defines if the job should run in background.
      *
      * @var bool
      */
-    private $runInBackground = true;
+    private bool $runInBackground = true;
 
     /**
      * Creation time.
      *
      * @var DateTime
      */
-    private $creationTime;
+    private DateTime $creationTime;
 
     /**
-     * Job schedule time.
+     * Time when the job was ordered to perform.
      *
-     * @var Cron\CronExpression
+     * @var DateTimeInterface
      */
-    private $executionTime;
+    private DateTimeInterface $runTime;
 
     /**
-     * Job schedule year.
+     * Real time when the job started to run.
      *
-     * @var string
+     * @var DateTime
      */
-    private $executionYear = null;
+    private DateTime $realRunTime;
+
+    /**
+     * Time, when job was finished or failed.
+     *
+     * @var DateTime
+     */
+    private DateTime $finishTime;
 
     /**
      * Temporary directory path for
@@ -64,14 +87,14 @@ class Job
      *
      * @var string
      */
-    private $tempDir;
+    private string $tempDir;
 
     /**
      * Path to the lock file.
      *
      * @var string
      */
-    private $lockFile;
+    private string $lockFile = '';
 
     /**
      * This could prevent the job to run.
@@ -79,7 +102,7 @@ class Job
      *
      * @var bool
      */
-    private $truthTest = true;
+    private bool $truthTest = true;
 
     /**
      * The output of the executed job.
@@ -93,28 +116,28 @@ class Job
      *
      * @var int
      */
-    private $returnCode = 0;
+    private int $returnCode = 0;
 
     /**
      * Files to write the output of the job.
      *
      * @var array
      */
-    private $outputTo = [];
+    private array $outputTo = [];
 
     /**
      * Email addresses where the output should be sent to.
      *
      * @var array
      */
-    private $emailTo = [];
+    private array $emailTo = [];
 
     /**
      * Configuration for email sending.
      *
      * @var array
      */
-    private $emailConfig = [];
+    private array $emailConfig = [];
 
     /**
      * A function to execute before the job is executed.
@@ -141,16 +164,16 @@ class Job
     /**
      * @var string
      */
-    private $outputMode;
+    private string $outputMode;
 
     /**
      * Create a new Job instance.
      *
-     * @param  string|callable  $command
-     * @param  array            $args
-     * @param  string           $id
+     * @param string|callable $command
+     * @param array           $args
+     * @param string|null     $id
      */
-    public function __construct($command, $args = [], $id = null)
+    public function __construct($command, array $args = [], string $id = null)
     {
         if (is_string($id)) {
             $this->id = $id;
@@ -179,7 +202,7 @@ class Job
      *
      * @return string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
@@ -190,14 +213,14 @@ class Job
      * the job is due. Defaults to job creation time.
      * It also defaults the execution time if not previously defined.
      *
-     * @param  DateTime  $date
+     * @param DateTimeInterface|null $date
      * @return bool
      */
-    public function isDue(DateTime $date = null)
+    public function isDue(DateTimeInterface $date = null): bool
     {
         // The execution time is being defaulted if not defined
         if (! $this->executionTime) {
-            $this->at('* * * * *');
+            $this->executionTime = self::getDefaultExpression();
         }
 
         $date = $date !== null ? $date : $this->creationTime;
@@ -214,7 +237,7 @@ class Job
      *
      * @return bool
      */
-    public function isOverlapping()
+    public function isOverlapping(): bool
     {
         return $this->lockFile &&
                file_exists($this->lockFile) &&
@@ -226,7 +249,7 @@ class Job
      *
      * @return self
      */
-    public function inForeground()
+    public function inForeground(): Job
     {
         $this->runInBackground = false;
 
@@ -238,7 +261,7 @@ class Job
      *
      * @return bool
      */
-    public function canRunInBackground()
+    public function canRunInBackground(): bool
     {
         if (is_callable($this->command) || $this->runInBackground === false) {
             return false;
@@ -253,11 +276,11 @@ class Job
      * being executed if the previous is still running.
      * The job id is used as a filename for the lock file.
      *
-     * @param  string    $tempDir          The directory path for the lock files
-     * @param  callable  $whenOverlapping  A callback to ignore job overlapping
+     * @param string|null   $tempDir         The directory path for the lock files
+     * @param callable|null $whenOverlapping A callback to ignore job overlapping
      * @return self
      */
-    public function onlyOne($tempDir = null, callable $whenOverlapping = null)
+    public function onlyOne(string $tempDir = null, callable $whenOverlapping = null): Job
     {
         if ($tempDir === null || ! is_dir($tempDir)) {
             $tempDir = $this->tempDir;
@@ -282,7 +305,7 @@ class Job
     /**
      * Compile the Job command.
      *
-     * @return mixed
+     * @return callable|object|string
      */
     public function compile()
     {
@@ -333,7 +356,7 @@ class Job
      * @param  array  $config
      * @return self
      */
-    public function configure(array $config = [])
+    public function configure(array $config = []): Job
     {
         if (isset($config['email'])) {
             if (! is_array($config['email'])) {
@@ -356,7 +379,7 @@ class Job
      * @param  callable  $fn
      * @return self
      */
-    public function when(callable $fn)
+    public function when(callable $fn): Job
     {
         $this->truthTest = $fn();
 
@@ -366,10 +389,16 @@ class Job
     /**
      * Run the job.
      *
+     * @param DateTimeInterface|null $runTime Time when job run was run.
+     *
+     * @throws Throwable
      * @return bool
      */
-    public function run()
+    public function run(DateTimeInterface $runTime = null): bool
     {
+        // Run time will be added when we are sure that we need to run.
+        $runTime = $runTime ?: new DateTime('now');
+
         // If the truthTest failed, don't run
         if ($this->truthTest !== true) {
             return false;
@@ -379,7 +408,7 @@ class Job
         if ($this->isOverlapping()) {
             return false;
         }
-
+        $this->runTime = $runTime;
         $compiled = $this->compile();
 
         // Write lock file if necessary
@@ -389,10 +418,15 @@ class Job
             call_user_func($this->before);
         }
 
-        if (is_callable($compiled)) {
-            $this->output = $this->exec($compiled);
-        } else {
-            exec($compiled, $this->output, $this->returnCode);
+        $this->realRunTime = new DateTime('now');
+        try {
+            if (is_callable($compiled)) {
+                $this->output = $this->exec($compiled);
+            } else {
+                exec($compiled, $this->output, $this->returnCode);
+            }
+        } finally {
+            $this->finishTime = new DateTime('now');
         }
 
         $this->finalise();
@@ -409,7 +443,7 @@ class Job
     private function createLockFile($content = null)
     {
         if ($this->lockFile) {
-            if ($content === null || ! is_string($content)) {
+            if (!is_string($content)) {
                 $content = $this->getId();
             }
 
@@ -433,17 +467,18 @@ class Job
      * Execute a callable job.
      *
      * @param  callable  $fn
-     * @throws Exception
+     * @throws Throwable
      * @return string
      */
-    private function exec(callable $fn)
+    private function exec(callable $fn): string
     {
         ob_start();
 
         try {
             $returnData = call_user_func_array($fn, $this->args);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             ob_end_clean();
+            $this->removeLockFile();
             throw $e;
         }
 
@@ -467,11 +502,11 @@ class Job
     /**
      * Set the file/s where to write the output of the job.
      *
-     * @param  string|array  $filename
-     * @param  bool          $append
+     * @param string|array $filename
+     * @param bool         $append
      * @return self
      */
-    public function output($filename, $append = false)
+    public function output($filename, bool $append = false): Job
     {
         $this->outputTo = is_array($filename) ? $filename : [$filename];
         $this->outputMode = $append === false ? 'w' : 'a';
@@ -497,7 +532,7 @@ class Job
      * @param  string|array  $email
      * @return self
      */
-    public function email($email)
+    public function email($email): Job
     {
         if (! is_string($email) && ! is_array($email)) {
             throw new InvalidArgumentException('The email can be only string or array');
@@ -512,7 +547,7 @@ class Job
     }
 
     /**
-     * Finilise the job after execution.
+     * Finalise the job after execution.
      *
      * @return void
      */
@@ -532,7 +567,7 @@ class Job
      *
      * @return bool
      */
-    private function emailOutput()
+    private function emailOutput(): bool
     {
         if (! count($this->outputTo) || ! count($this->emailTo)) {
             return false;
@@ -557,7 +592,7 @@ class Job
      * @param callable $fn
      * @return self
      */
-    public function before(callable $fn)
+    public function before(callable $fn): Job
     {
         $this->before = $fn;
 
@@ -566,17 +601,17 @@ class Job
 
     /**
      * Set a function to be called after job execution.
-     * By default this will force the job to run in foreground
+     * By default, this will force the job to run in foreground
      * because the output is injected as a parameter of this
      * function, but it could be avoided by passing true as a
      * second parameter. The job will run in background if it
      * meets all the other criteria.
      *
-     * @param  callable  $fn
-     * @param  bool      $runInBackground
+     * @param callable $fn
+     * @param bool     $runInBackground
      * @return self
      */
-    public function then(callable $fn, $runInBackground = false)
+    public function then(callable $fn, bool $runInBackground = false): Job
     {
         $this->after = $fn;
 
@@ -586,5 +621,55 @@ class Job
         }
 
         return $this;
+    }
+
+    /**
+     * Get time, when job was created.
+     *
+     * @return DateTime
+     */
+    public function getCreationTime(): DateTime
+    {
+        return clone $this->creationTime;
+    }
+
+    /**
+     * Get Time when the job was ordered to perform.
+     *
+     * @return DateTimeInterface|null
+     */
+    public function getRunTime():? DateTimeInterface
+    {
+        return isset($this->runTime) ? clone $this->runTime : null;
+    }
+
+    /**
+     * Get real time when the job started to run.
+     *
+     * @return DateTime|null
+     */
+    public function getRealRunTime():? DateTime
+    {
+        return isset($this->realRunTime) ? clone $this->realRunTime : null;
+    }
+
+    /**
+     * Get time, when job was finished or failed.
+     *
+     * @return DateTime|null
+     */
+    public function getFinishTime():? DateTime
+    {
+        return isset($this->finishTime) ? clone $this->finishTime : null;
+    }
+
+    /**
+     * The default CRON expression that can determine whether the job should be run.
+     *
+     * @return CronExpression
+     */
+    public static function getDefaultExpression(): CronExpression
+    {
+        return new CronExpression('* * * * *');
     }
 }

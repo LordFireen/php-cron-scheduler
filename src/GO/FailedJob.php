@@ -1,31 +1,41 @@
 <?php namespace GO;
 
-use Exception;
+use Throwable;
 
 class FailedJob
 {
     /**
      * @var Job
      */
-    private $job;
+    private Job $job;
 
     /**
-     * @var Exception
+     * @var Throwable
      */
-    private $exception;
+    private Throwable $exception;
 
-    public function __construct(Job $job, Exception $exception)
+    public function __construct(Job $job, Throwable $exception)
     {
         $this->job = $job;
         $this->exception = $exception;
     }
 
+    /**
+     * Get the job which was failed.
+     *
+     * @return Job
+     */
     public function getJob(): Job
     {
         return $this->job;
     }
 
-    public function getException(): Exception
+    /**
+     * Get the exception that failed the job.
+     *
+     * @return Throwable
+     */
+    public function getException(): Throwable
     {
         return $this->exception;
     }

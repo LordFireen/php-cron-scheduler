@@ -1,43 +1,43 @@
 <?php namespace GO;
 
 use DateTime;
-use Exception;
 use InvalidArgumentException;
+use Throwable;
 
 class Scheduler
 {
     /**
      * The queued jobs.
      *
-     * @var array
+     * @var Job[]
      */
-    private $jobs = [];
+    private array $jobs = [];
 
     /**
      * Successfully executed jobs.
      *
-     * @var array
+     * @var Job[]
      */
-    private $executedJobs = [];
+    private array $executedJobs = [];
 
     /**
      * Failed jobs.
      *
      * @var FailedJob[]
      */
-    private $failedJobs = [];
+    private array $failedJobs = [];
 
     /**
      * The verbose output of the scheduled jobs.
      *
-     * @var array
+     * @var string[]
      */
-    private $outputSchedule = [];
+    private array $outputSchedule = [];
 
     /**
      * @var array
      */
-    private $config;
+    private array $config;
 
     /**
      * Create new instance.
@@ -55,7 +55,7 @@ class Scheduler
      * @param  Job  $job
      * @return void
      */
-    private function queueJob(Job $job)
+    protected function queueJob(Job $job)
     {
         $this->jobs[] = $job;
     }
@@ -63,9 +63,9 @@ class Scheduler
     /**
      * Prioritise jobs in background.
      *
-     * @return array
+     * @return Job[]
      */
-    private function prioritiseJobs()
+    protected function prioritiseJobs(): array
     {
         $background = [];
         $foreground = [];
@@ -84,9 +84,9 @@ class Scheduler
     /**
      * Get the queued jobs.
      *
-     * @return array
+     * @return Job[]
      */
-    public function getQueuedJobs()
+    public function getQueuedJobs(): array
     {
         return $this->prioritiseJobs();
     }
@@ -94,12 +94,12 @@ class Scheduler
     /**
      * Queues a function execution.
      *
-     * @param  callable  $fn  The function to execute
-     * @param  array  $args  Optional arguments to pass to the php script
-     * @param  string  $id   Optional custom identifier
+     * @param callable    $fn   The function to execute
+     * @param array       $args Optional arguments to pass to the php script
+     * @param string|null $id   Optional custom identifier
      * @return Job
      */
-    public function call(callable $fn, $args = [], $id = null)
+    public function call(callable $fn, array $args = [], string $id = null): Job
     {
         $job = new Job($fn, $args, $id);
 
@@ -111,24 +111,20 @@ class Scheduler
     /**
      * Queues a php script execution.
      *
-     * @param  string  $script  The path to the php script to execute
-     * @param  string  $bin     Optional path to the php binary
-     * @param  array  $args     Optional arguments to pass to the php script
-     * @param  string  $id      Optional custom identifier
+     * @param string      $script The path to the php script to execute
+     * @param string|null $bin    Optional path to the php binary
+     * @param array       $args   Optional arguments to pass to the php script
+     * @param string|null $id     Optional custom identifier
      * @return Job
      */
-    public function php($script, $bin = null, $args = [], $id = null)
+    public function php(string $script, string $bin = null, array $args = [], string $id = null): Job
     {
-        if (! is_string($script)) {
-            throw new InvalidArgumentException('The script should be a valid path to a file.');
-        }
-
-        $bin = $bin !== null && is_string($bin) && file_exists($bin) ?
+        $bin = is_string($bin) && file_exists($bin) ?
             $bin : (PHP_BINARY === '' ? '/usr/bin/php' : PHP_BINARY);
 
         $job = new Job($bin . ' ' . $script, $args, $id);
 
-        if (! file_exists($script)) {
+        if (!file_exists($script)) {
             $this->pushFailedJob(
                 $job,
                 new InvalidArgumentException('The script should be a valid path to a file.')
@@ -143,12 +139,12 @@ class Scheduler
     /**
      * Queue a raw shell command.
      *
-     * @param  string  $command  The command to execute
-     * @param  array  $args      Optional arguments to pass to the command
-     * @param  string  $id       Optional custom identifier
+     * @param string      $command The command to execute
+     * @param array       $args    Optional arguments to pass to the command
+     * @param string|null $id      Optional custom identifier
      * @return Job
      */
-    public function raw($command, $args = [], $id = null)
+    public function raw(string $command, array $args = [], string $id = null): Job
     {
         $job = new Job($command, $args, $id);
 
@@ -160,10 +156,10 @@ class Scheduler
     /**
      * Run the scheduler.
      *
-     * @param  DateTime  $runTime  Optional, run at specific moment
-     * @return array  Executed jobs
+     * @param DateTime|null $runTime Optional, run at specific moment
+     * @return Job[]  Executed jobs
      */
-    public function run(Datetime $runTime = null)
+    public function run(Datetime $runTime = null): array
     {
         $jobs = $this->getQueuedJobs();
 
@@ -174,9 +170,9 @@ class Scheduler
         foreach ($jobs as $job) {
             if ($job->isDue($runTime)) {
                 try {
-                    $job->run();
+                    $job->run($runTime);
                     $this->pushExecutedJob($job);
-                } catch (\Exception $e) {
+                } catch (Throwable $e) {
                     $this->pushFailedJob($job, $e);
                 }
             }
@@ -190,7 +186,7 @@ class Scheduler
      *
      * Call before run() if you call run() multiple times.
      */
-    public function resetRun()
+    public function resetRun(): Scheduler
     {
         // Reset collected data of last run
         $this->executedJobs = [];
@@ -203,10 +199,10 @@ class Scheduler
     /**
      * Add an entry to the scheduler verbose output array.
      *
-     * @param  string  $string
+     * @param string $string
      * @return void
      */
-    private function addSchedulerVerboseOutput($string)
+    protected function addSchedulerVerboseOutput(string $string)
     {
         $now = '[' . (new DateTime('now'))->format('c') . '] ';
         $this->outputSchedule[] = $now . $string;
@@ -216,12 +212,12 @@ class Scheduler
     }
 
     /**
-     * Push a succesfully executed job.
+     * Push a successfully executed job.
      *
      * @param  Job  $job
-     * @return Job
+     * @return void
      */
-    private function pushExecutedJob(Job $job)
+    protected function pushExecutedJob(Job $job): void
     {
         $this->executedJobs[] = $job;
 
@@ -232,9 +228,7 @@ class Scheduler
             $compiled = 'Closure';
         }
 
-        $this->addSchedulerVerboseOutput("Executing {$compiled}");
-
-        return $job;
+        $this->addSchedulerVerboseOutput("Executing $compiled");
     }
 
     /**
@@ -242,7 +236,7 @@ class Scheduler
      *
      * @return array
      */
-    public function getExecutedJobs()
+    public function getExecutedJobs(): array
     {
         return $this->executedJobs;
     }
@@ -251,10 +245,10 @@ class Scheduler
      * Push a failed job.
      *
      * @param  Job  $job
-     * @param  Exception  $e
-     * @return Job
+     * @param  Throwable  $e
+     * @return void
      */
-    private function pushFailedJob(Job $job, Exception $e)
+    protected function pushFailedJob(Job $job, Throwable $e): void
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
@@ -265,9 +259,7 @@ class Scheduler
             $compiled = 'Closure';
         }
 
-        $this->addSchedulerVerboseOutput("{$e->getMessage()}: {$compiled}");
-
-        return $job;
+        $this->addSchedulerVerboseOutput("{$e->getMessage()}: $compiled");
     }
 
     /**
@@ -275,7 +267,7 @@ class Scheduler
      *
      * @return FailedJob[]
      */
-    public function getFailedJobs()
+    public function getFailedJobs(): array
     {
         return $this->failedJobs;
     }
@@ -283,10 +275,10 @@ class Scheduler
     /**
      * Get the scheduler verbose output.
      *
-     * @param  string  $type  Allowed: text, html, array
-     * @return mixed  The return depends on the requested $type
+     * @param string $type Allowed: text, html, array
+     * @return string[]|string  The return depends on the requested $type
      */
-    public function getVerboseOutput($type = 'text')
+    public function getVerboseOutput(string $type = 'text')
     {
         switch ($type) {
             case 'text':
@@ -303,7 +295,7 @@ class Scheduler
     /**
      * Remove all queued Jobs.
      */
-    public function clearJobs()
+    public function clearJobs(): Scheduler
     {
         $this->jobs = [];
 
@@ -313,7 +305,7 @@ class Scheduler
     /**
      * Start a worker.
      *
-     * @param  array  $seconds - When the scheduler should run
+     * @param array $seconds - When the scheduler should run
      */
     public function work(array $seconds = [0])
     {
