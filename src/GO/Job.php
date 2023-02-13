@@ -51,14 +51,14 @@ class Job
      *
      * @var CronExpression
      */
-    private $executionTime;
+    protected $executionTime;
 
     /**
      * Job schedule year.
      *
      * @var string
      */
-    private $executionYear = null;
+    protected $executionYear = null;
 
     /**
      * Temporary directory path for
