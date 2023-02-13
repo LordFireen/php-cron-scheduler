@@ -1,7 +1,6 @@
 <?php namespace GO;
 
 use DateTime;
-use Exception;
 use InvalidArgumentException;
 use Throwable;
 
@@ -246,10 +245,10 @@ class Scheduler
      * Push a failed job.
      *
      * @param  Job  $job
-     * @param  Exception  $e
+     * @param  Throwable  $e
      * @return void
      */
-    private function pushFailedJob(Job $job, Exception $e): void
+    private function pushFailedJob(Job $job, Throwable $e): void
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
