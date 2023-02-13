@@ -636,31 +636,31 @@ class Job
     /**
      * Get Time when the job was ordered to perform.
      *
-     * @return DateTimeInterface
+     * @return DateTimeInterface|null
      */
-    public function getRunTime(): DateTimeInterface
+    public function getRunTime():? DateTimeInterface
     {
-        return clone $this->runTime;
+        return isset($this->runTime) ? clone $this->runTime : null;
     }
 
     /**
      * Get real time when the job started to run.
      *
-     * @return DateTime
+     * @return DateTime|null
      */
-    public function getRealRunTime(): DateTime
+    public function getRealRunTime():? DateTime
     {
-        return clone $this->realRunTime;
+        return isset($this->realRunTime) ? clone $this->realRunTime : null;
     }
 
     /**
      * Get time, when job was finished or failed.
      *
-     * @return DateTime
+     * @return DateTime|null
      */
-    public function getFinishTime(): DateTime
+    public function getFinishTime():? DateTime
     {
-        return clone $this->finishTime;
+        return isset($this->finishTime) ? clone $this->finishTime : null;
     }
 
     /**
