@@ -1,9 +1,9 @@
 PHP Cron Scheduler
 ==
 
-[![Latest Stable Version](https://poser.pugx.org/peppeocchi/php-cron-scheduler/v/stable)](https://packagist.org/packages/peppeocchi/php-cron-scheduler) [![License](https://poser.pugx.org/peppeocchi/php-cron-scheduler/license)](https://packagist.org/packages/peppeocchi/php-cron-scheduler) [![Build Status](https://travis-ci.org/peppeocchi/php-cron-scheduler.svg)](https://travis-ci.org/peppeocchi/php-cron-scheduler) [![Coverage Status](https://coveralls.io/repos/github/peppeocchi/php-cron-scheduler/badge.svg?branch=master)](https://coveralls.io/github/peppeocchi/php-cron-scheduler?branch=master) [![StyleCI](https://styleci.io/repos/38302733/shield)](https://styleci.io/repos/38302733) [![Total Downloads](https://poser.pugx.org/peppeocchi/php-cron-scheduler/downloads)](https://packagist.org/packages/peppeocchi/php-cron-scheduler)
+[![Latest Stable Version](https://poser.pugx.org/lordf/php-cron-scheduler/v/stable)](https://packagist.org/packages/lordf/php-cron-scheduler) [![License](https://poser.pugx.org/lordf/php-cron-scheduler/license)](https://packagist.org/packages/lordf/php-cron-scheduler) [![Build Status](https://travis-ci.org/lordf/php-cron-scheduler.svg)](https://travis-ci.org/lordf/php-cron-scheduler) [![Coverage Status](https://coveralls.io/repos/github/lordf/php-cron-scheduler/badge.svg?branch=master)](https://coveralls.io/github/lordf/php-cron-scheduler?branch=master) [![StyleCI](https://styleci.io/repos/38302733/shield)](https://styleci.io/repos/38302733) [![Total Downloads](https://poser.pugx.org/lordf/php-cron-scheduler/downloads)](https://packagist.org/packages/lordf/php-cron-scheduler)
 
-This is a framework agnostic cron jobs scheduler that can be easily integrated with your project or run as a standalone command scheduler.
+This is a Forked package of https://github.com/peppeocchi/php-cron-scheduler which is framework agnostic cron jobs scheduler that can be easily integrated with your project or run as a standalone command scheduler.
 The idea was originally inspired by the [Laravel Task Scheduling](http://laravel.com/docs/5.1/scheduling).
 
 ## Installing via Composer
@@ -12,18 +12,18 @@ Please refer to [Getting Started](https://getcomposer.org/doc/00-intro.md) on ho
 
 After you have downloaded/installed Composer, run
 
-`php composer.phar require peppeocchi/php-cron-scheduler`
+`php composer.phar require lordf/php-cron-scheduler`
 
 or add the package to your `composer.json`
 ```json
 {
     "require": {
-        "peppeocchi/php-cron-scheduler": "4.*"
+        "lordf/php-cron-scheduler": "5.*"
     }
 }
 ```
 
-Scheduler V4 requires php >= 7.3, please use the [v3 branch](https://github.com/peppeocchi/php-cron-scheduler/tree/v3.x) for php versions < 7.3 and > 7.1 or the [v2 branch](https://github.com/peppeocchi/php-cron-scheduler/tree/v2.x) for php versions < 7.1.
+Scheduler requires php >= 7.4, for previous version checkout original repository https://github.com/peppeocchi/php-cron-scheduler
 
 ## How it works
 
@@ -52,7 +52,7 @@ That's it! Your scheduler is up and running, now you can add your jobs without w
 
 ## Scheduling jobs
 
-By default all your jobs will try to run in background.
+By default, all your jobs will try to run in background.
 PHP scripts and raw commands will run in background by default, while functions will always run in foreground.
 You can force a command to run in foreground by calling the `inForeground()` method.
 **Jobs that have to send the output to email, will run foreground**.
@@ -65,7 +65,7 @@ $scheduler->php('path/to/my/script.php');
 The `php` method accepts 4 arguments:
 - The path to your php script
 - The PHP binary to use
-- Arguments to be passed to the script (**NOTE**: You need to have **register_argc_argv** enable in your php.ini for this to work ([ref](https://github.com/peppeocchi/php-cron-scheduler/issues/88)). Don't worry it's enabled by default, so unless you've intentionally disabled it or your host has it disabled by default, you can ignore it.)
+- Arguments to be passed to the script (**NOTE**: You need to have **register_argc_argv** enable in your php.ini for this to work ([ref](https://github.com/lordf/php-cron-scheduler/issues/88)). Don't worry it's enabled by default, so unless you've intentionally disabled it or your host has it disabled by default, you can ignore it.)
 - Identifier
 ```php
 $scheduler->php(
@@ -435,7 +435,7 @@ $scheduler->resetRun()
 
 ### Faking scheduler run time
 When running the scheduler you might pass an `DateTime` to fake the scheduler run time.
-The resons for this feature are described [here](https://github.com/peppeocchi/php-cron-scheduler/pull/28);
+The resons for this feature are described [here](https://github.com/lordf/php-cron-scheduler/pull/28);
 
 ```
 // ...
@@ -455,6 +455,27 @@ $exception = $failedJob->getException();
 
 // job that failed
 $job = $failedJob->getJob();
+```
+
+### Job timestamps
+
+If you want to know when Job was started, finished or failed, you can access of these timestamps which are `DateTime` object or `null` when Job doesn't start etc.
+
+```php
+// Get all failed jobs and select first
+$failedJob = $scheduler->getFailedJobs()[0];
+
+// job that failed
+$job = $failedJob->getJob();
+
+// Time, when job was created
+$job->getCreationTime();
+// Time when the job was ordered to perform by Scheduler
+$job->getRunTime();
+// Real time when the job started to run. (After checks, compiling and "before" callback)
+$job->getRealRunTime();
+// Time, when job was finished (Excluding "then" callback and email output) or failed.
+$job->getFinishTime();
 ```
 
 ### Worker
