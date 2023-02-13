@@ -199,7 +199,7 @@ class Job
     {
         // The execution time is being defaulted if not defined
         if (! $this->executionTime) {
-            $this->at('* * * * *');
+            $this->executionTime = self::getDefaultExpression();
         }
 
         $date = $date !== null ? $date : $this->creationTime;
@@ -589,5 +589,15 @@ class Job
         }
 
         return $this;
+    }
+
+    /**
+     * The default CRON expression that can determine whether the job should be run.
+     *
+     * @return CronExpression
+     */
+    public static function getDefaultExpression(): CronExpression
+    {
+        return new CronExpression('* * * * *');
     }
 }
