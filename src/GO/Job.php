@@ -447,6 +447,7 @@ class Job
             $returnData = call_user_func_array($fn, $this->args);
         } catch (Throwable $e) {
             ob_end_clean();
+            $this->removeLockFile();
             throw $e;
         }
 
