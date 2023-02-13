@@ -56,9 +56,23 @@ class Job
     /**
      * Creation time.
      *
-     * @var DateTimeInterface
+     * @var DateTime
      */
-    private DateTimeInterface $creationTime;
+    private DateTime $creationTime;
+
+    /**
+     * Real time, when job was run.
+     *
+     * @var DateTime
+     */
+    private DateTime $realRunTime;
+
+    /**
+     * Time, when job was finished or failed.
+     *
+     * @var DateTime
+     */
+    private DateTime $finishTime;
 
     /**
      * Temporary directory path for
@@ -392,10 +406,15 @@ class Job
             call_user_func($this->before);
         }
 
-        if (is_callable($compiled)) {
-            $this->output = $this->exec($compiled);
-        } else {
-            exec($compiled, $this->output, $this->returnCode);
+        $this->realRunTime = new DateTime('now');
+        try {
+            if (is_callable($compiled)) {
+                $this->output = $this->exec($compiled);
+            } else {
+                exec($compiled, $this->output, $this->returnCode);
+            }
+        } finally {
+            $this->finishTime = new DateTime('now');
         }
 
         $this->finalise();
@@ -590,6 +609,36 @@ class Job
         }
 
         return $this;
+    }
+
+    /**
+     * Get time, when job was created.
+     *
+     * @return DateTime
+     */
+    public function getCreationTime(): DateTime
+    {
+        return clone $this->creationTime;
+    }
+
+    /**
+     * Get real time, when job was run.
+     *
+     * @return DateTime
+     */
+    public function getRealRunTime(): DateTime
+    {
+        return clone $this->realRunTime;
+    }
+
+    /**
+     * Get time, when job was finished or failed.
+     *
+     * @return DateTime
+     */
+    public function getFinishTime(): DateTime
+    {
+        return clone $this->finishTime;
     }
 
     /**
