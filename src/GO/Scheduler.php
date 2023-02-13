@@ -202,7 +202,7 @@ class Scheduler
      * @param string $string
      * @return void
      */
-    private function addSchedulerVerboseOutput(string $string)
+    protected function addSchedulerVerboseOutput(string $string)
     {
         $now = '[' . (new DateTime('now'))->format('c') . '] ';
         $this->outputSchedule[] = $now . $string;
@@ -217,7 +217,7 @@ class Scheduler
      * @param  Job  $job
      * @return void
      */
-    private function pushExecutedJob(Job $job): void
+    protected function pushExecutedJob(Job $job): void
     {
         $this->executedJobs[] = $job;
 
@@ -248,7 +248,7 @@ class Scheduler
      * @param  Throwable  $e
      * @return void
      */
-    private function pushFailedJob(Job $job, Throwable $e): void
+    protected function pushFailedJob(Job $job, Throwable $e): void
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
