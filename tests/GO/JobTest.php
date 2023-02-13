@@ -239,6 +239,23 @@ class JobTest extends TestCase
         $this->assertFalse(file_exists($lockFile));
     }
 
+    public function testShouldRemoveLockWhenFailedAfterRunningClosures()
+    {
+        $job = new Job(function () {
+            throw new \Exception('');
+        });
+
+        // Default temp dir
+        $tmpDir = __DIR__ . '/../tmp';
+        $lockFile = $tmpDir . '/' . $job->getId() . '.lock';
+
+        try {
+            $job->onlyOne($tmpDir)->run();
+        } catch (\Throwable $e) {
+            $this->assertFalse(file_exists($lockFile));
+        }
+    }
+
     public function testShouldKnowIfOverlapping()
     {
         $command = PHP_BINARY . ' ' . __DIR__ . '/../async_job.php';
