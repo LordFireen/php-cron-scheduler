@@ -253,6 +253,26 @@ class JobTest extends TestCase
             $job->onlyOne($tmpDir)->run();
         } catch (\Throwable $e) {
             $this->assertFalse(file_exists($lockFile));
+            $this->assertFalse($job->isOverlapping());
+        }
+    }
+
+    public function testShouldRemoveLockWhenFailedBeforeClosure()
+    {
+        $job = new Job(function () {});
+        $job->before(function () {
+            throw new \Exception('');
+        });
+
+        // Default temp dir
+        $tmpDir = __DIR__ . '/../tmp';
+        $lockFile = $tmpDir . '/' . $job->getId() . '.lock';
+
+        try {
+            $job->onlyOne($tmpDir)->run();
+        } catch (\Throwable $e) {
+            $this->assertFalse(file_exists($lockFile));
+            $this->assertFalse($job->isOverlapping());
         }
     }
 

@@ -414,9 +414,15 @@ class Job
         // Write lock file if necessary
         $this->createLockFile();
 
-        if (is_callable($this->before)) {
-            call_user_func($this->before);
+        try {
+            if (is_callable($this->before)) {
+                call_user_func($this->before);
+            }
+        } catch (Throwable $e) {
+            $this->removeLockFile();
+            throw $e;
         }
+
 
         $this->realRunTime = new DateTime('now');
         try {
